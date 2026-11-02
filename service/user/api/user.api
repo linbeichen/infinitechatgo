@@ -1,0 +1,401 @@
+info (
+	title: "用户服务"
+	desc:  "实现用户相关功能"
+)
+
+//sendCaptcha
+type SendCaptchaReq {
+	Account string `form:"account,optional" validate:"required,min=5,max=20" msg:"required=账号不能为空;min=账号长度在5到20之间;max=账号长度在5到20之间"`
+}
+
+//loginPassword
+// 密码登录请求
+type LoginPasswordRequest {
+	Account  string `json:"account" form:"account,optional" validate:"required" msg:"账号不能为空"`
+	Password string `json:"password" form:"password,optional" validate:"required" msg:"密码不能为空"`
+}
+
+// 登录响应
+type LoginResponse {
+	UserId       int64  `json:"userId"`
+	Account      string `json:"account"`
+	Nickname     string `json:"nickname"`
+	Avatar       string `json:"avatar"`
+	Gender       int32  `json:"gender"`
+	Description  string `json:"description"`
+	Token        string `json:"token"`
+	RefreshToken string `json:"refreshToken"`
+	WsServerUri  string `json:"wsServerUri"`
+}
+
+//loginCode
+// 短信登录请求
+type LoginCodeRequest {
+	Account string `json:"account" form:"account,optional" validate:"required" msg:"账号不能为空"`
+	Code    string `json:"code" form:"code,optional" validate:"required" msg:"验证码不能为空"`
+}
+
+//register
+// 用户注册请求
+type UserRegisterRequest {
+	Account         string `json:"account" form:"account,optional" validate:"required" msg:"账号不能为空"`
+	Password        string `json:"password" form:"password,optional" validate:"required" msg:"密码不能为空"`
+	ConfirmPassword string `json:"confirmPassword" form:"confirmPassword,optional" validate:"required" msg:"确认密码不能为空"`
+	Code            string `json:"code" form:"code,optional" validate:"required" msg:"验证码不能为空"`
+	Nickname        string `json:"nickname" form:"nickname,optional" validate:"required" msg:"昵称不能为空"`
+}
+
+// 用户信息响应
+type UserInfoResponse {
+	UserId      int64  `json:"userId"`
+	Nickname    string `json:"nickname"`
+	Avatar      string `json:"avatar"`
+	Description string `json:"description"`
+	Account     string `json:"account"`
+	Gender      int64  `json:"gender"`
+}
+
+//updatePassword
+// 用户更新请求
+type UserUpdateRequest {
+	Account         string `json:"account" form:"account,optional" validate:"required" msg:"账号不能为空"`
+	Password        string `json:"password" form:"password,optional" validate:"required" msg:"密码不能为空"`
+	ConfirmPassword string `json:"confirmPassword" form:"confirmPassword,optional" validate:"required" msg:"确认密码不能为空"`
+	Code            string `json:"code" form:"code,optional" validate:"required" msg:"验证码不能为空"`
+}
+
+//getUploadUrl
+type GetUploadUrlRequest {
+	FileName string `json:"fileName,optional" form:"fileName,optional" validate:"required" msg:"文件名不能为空"`
+}
+
+type UploadUrlResponse {
+	UploadUrl   string `json:"uploadUrl"`
+	DownloadUrl string `json:"downloadUrl"`
+}
+
+//updateAvatar
+// 更新头像请求
+type UpdateAvatarRequest {
+	Uri    string `json:"uri" form:"uri,optional" validate:"required" msg:"uri不能为空"`
+	UserId int64  `json:"userId" form:"userId,optional" validate:"required" msg:"用户ID不能为空"`
+}
+
+// 用户id请求
+type UserIdRequest {
+	UserId int64 `json:"userId,optional" form:"userId,optional" validate:"required" msg:"用户ID不能为空"`
+}
+
+// 用户id 作为路径参数的请求
+type UserIdPathRequest {
+	UserId int64 `path:"userId,optional" validate:"required" msg:"用户ID不能为空"`
+}
+
+//getBalanceDetail
+// 获取账户余额详情请求
+type GetBalanceDetailRequest {
+	UserId   int64 `path:"userId,optional" validate:"required" msg:"用户ID不能为空"`
+	PageNum  int32 `json:"pageNum,default=1" form:"pageNum,default=1"`
+	PageSize int32 `json:"pageSize,default=20,range=[1:100]" form:"pageSize,default=20,range=[1:100]"`
+}
+
+type SearchUserReq {
+	UserId  string `path:"userId"`
+	Keyword string `form:"keyword"`
+}
+
+type FriendDetailVO {
+	UserId    string `json:"userId"` //用户ID
+	Nickname  string `json:"nickname"` //昵称
+	Avatar    string `json:"avatar"` //头像URL
+	Email     string `json:"email"` //邮箱
+	Phone     string `json:"phone"` //手机号
+	Signature string `json:"signature"` //个性签名
+	Gender    int32  `json:"gender"` //性别 (0:女 1:男 2:未知)
+	SessionId string `json:"sessionId"` //会话ID
+	Status    int32  `json:"status"` //好友状态 (0:好友 1:拉黑 2:删除 -1:非好友)
+}
+
+type GetFriendsReq {
+	UserId   string `path:"userId"` //用户ID
+	PageNum  int32  `form:"pageNum,default=1"` //当前页码（从 1 开始）
+	PageSize int32  `form:"pageSize,default=20,range=[1:100]"` //每页大小
+	Key      string `form:"key,optional"` //查询关键字
+}
+
+type SendFriendRequestReq {
+	UserId        string `path:"userId"` //发送者用户ID
+	ReceiveuserId string `path:"receiveuserId"` //接收者用户ID
+	Msg           string `json:"msg,optional" validate:"required" msg:"账号不能为空"` //申请信息
+}
+
+type GetApplyListReq {
+	UserId   int64 `path:"userId" validate:"required" msg:"用户ID不能为空"` //用户ID
+	PageNum  int32 `json:"pageNum,default=1" form:"pageNum,default=1"` //当前页码（从 1 开始）
+	PageSize int32 `json:"pageSize,default=20,range=[1:100]" form:"pageSize,default=20,range=[1:100]"` //每页大小
+}
+
+type UserIdAndReceiveuserIdReq {
+	UserId        string `path:"userId"` //用户ID
+	ReceiveuserId string `path:"receiveuserId"` //取消拉黑的好友ID 或 删除的好友ID
+}
+
+type ModifyFriendApplicationStatusReq {
+	UserId         string   `path:"userId"` //用户ID
+	Status         string   `path:"status"` //状态（1:通过、2:拒绝、3:已读）
+	receiveuserIds []string `json:"receiveuserIds" validate:"required" msg:"receiveuserIds不能为空"` //用户ID列表
+}
+
+type GetFriendDetailReq {
+	UserId   string `path:"userId"` //用户ID
+	FriendId string `path:"friendId"` //好友ID
+}
+
+type CreateGroupRequest {
+	CreatorId int64   `json:"creatorId" validate:"required" msg:"创建者ID不能为空"`
+	MemberIds []int64 `json:"memberIds" validate:"required" msg:"成员ID列表不能为空"`
+}
+
+type InviteGroupRequest {
+	SessionId  int64   `json:"sessionId" validate:"required" msg:"会话ID不能为空"`
+	InviterId  int64   `json:"inviterId" validate:"required" msg:"邀请者ID不能为空"`
+	InviteeIds []int64 `json:"inviteeIds" validate:"required" msg:"被邀请者ID列表不能为空"`
+}
+
+type InviteGroupResponse {
+	SuccessIds []int64 `json:"successIds"`
+	FailedIds  []int64 `json:"failedIds"`
+}
+
+type KickGroupMembersRequest {
+	SessionId  string  `json:"sessionId" validate:"required" msg:"会话ID不能为空"`
+	OperatorId int64   `json:"operatorId" validate:"required" msg:"操作者ID不能为空"`
+	MemberIds  []int64 `json:"memberIds" validate:"required" msg:"成员ID列表不能为空"`
+}
+
+type KickGroupMembersResponse {
+	SuccessIds []string `json:"successIds"` //成功踢出的成员ID列表
+}
+
+type GroupExitRequestDTO {
+	SessionId int64 `json:"sessionId" validate:"required" msg:"会话ID不能为空"`
+	UserId    int64 `json:"userId" validate:"required" msg:"用户ID不能为空"`
+}
+
+type GetGroupMembersReq {
+	SessionId int64 `path:"sessionId" validate:"required" msg:"会话ID不能为空"`
+	PageNum   int32 `json:"pageNum,default=1" form:"pageNum,default=1"`
+	PageSize  int32 `json:"pageSize,default=20,range=[1:100]" form:"pageSize,default=20,range=[1:100]"`
+}
+
+type GetUserGroupsReq {
+	UserId   int64 `path:"userId" validate:"required" msg:"用户ID不能为空"`
+	PageNum  int32 `json:"pageNum,default=1" form:"pageNum,default=1"`
+	PageSize int32 `json:"pageSize,default=20,range=[1:100]" form:"pageSize,default=20,range=[1:100]"`
+}
+
+type SessionIdPathReq {
+	SessionId int64 `path:"sessionId" validate:"required" msg:"会话ID不能为空"`
+}
+
+type RefreshTokeRequest {
+	RefreshToken string `json:"refreshToken"`
+}
+
+type GetUserStatusReq {
+	UserId int64 `form:"userId" validate:"required" msg:"用户ID不能为空"`
+}
+
+type SessionParamReq {
+	SessionId int64 `form:"sessionId" validate:"required" msg:"会话ID不能为空"`
+}
+
+type UserStatusResponse {
+	UserId int64 `json:"userId"`
+	/*
+* 用户状态
+* @see UserStateConstant
+* 0: 正常
+* 1: 封禁
+* 2: 注销
+* null: 用户不存在
+*/
+	State int32 `json:"state"`
+	//状态描述
+	StateName string `json:"stateName"`
+}
+
+type GroupMembersCountResponse {
+	SessionId   int64 `json:"sessionId"` //会话 ID（群聊 ID）
+	MemberCount int32 `json:"memberCount"` //群成员数量
+}
+
+type CheckGroupMembershipReq {
+	UserId    int64 `form:"userId" validate:"required" msg:"用户ID不能为空"`
+	SessionId int64 `form:"sessionId" validate:"required" msg:"会话ID不能为空"`
+}
+
+type GroupMembershipResponse {
+	UserId    int64 `json:"userId"`
+	SessionId int64 `json:"sessionId"`
+	IsMember  bool  `json:"isMember"`
+	/*
+* 成员角色
+* 0: 群主
+* 1: 管理员
+* 2: 普通成员
+* null: 非成员
+*/
+	Role int32 `json:"role"`
+}
+
+//go-zero不支持对数组1,2,3的解析，只能使用字符串，不能使用[]int64
+type BatchGetUserInfosReq {
+	UserIds string `form:"userIds" validate:"required" msg:"用户ID列表不能为空"`
+}
+
+type SingleMessageValidateRequest {
+	SenderId   int64 `json:"senderId" validate:"required" msg:"发送者ID不能为空"`
+	ReceiverId int64 `json:"receiverId" validate:"required" msg:"接收者ID不能为空"`
+	SessionId  int64 `json:"sessionId" validate:"required" msg:"会话ID不能为空"`
+}
+
+type MessageValidateResponse {
+	allowed      bool   `json:"allowed"` //是否允许发送
+	rejectReason string `json:"rejectReason"` //拒绝原因（可选）
+	errorCode    int32  `json:"errorCode"` //错误码（可选）
+}
+
+/*
+路由分组
+/api/user
+*/
+@server (
+	prefix:  /api/user //路由前缀
+	group:   user //代码分组，生成的文件放在 user/ 子目录，不配则全堆一起
+	timeout: 10s // 该组路由的统一超时，覆盖全局配置
+)
+service user-api {
+	//发送验证码
+	@handler sendCaptcha
+	get /sendCaptcha (SendCaptchaReq) returns (string)
+
+	@handler loginPassword //密码登录
+	post /loginPassword (LoginPasswordRequest) returns (LoginResponse)
+
+	@handler loginCode //短信登录
+	post /loginCode (LoginCodeRequest) returns (LoginResponse)
+
+	@handler register //注册
+	post /register (UserRegisterRequest) returns (LoginResponse)
+
+	@handler logout //退出登录
+	post /logout (UserIdRequest)
+
+	@handler getUserInfo //根据UserId 获取user信息
+	get /getUserInfo (UserIdRequest) returns (UserInfoResponse)
+
+	@handler updatePassword //修改密码
+	post /updatePassword (UserUpdateRequest)
+
+	@handler refreshUri //重新分配并刷新用户的WebSocket连接地址。
+	get /refresh/uri (UserIdRequest)
+
+	@handler getUploadUrl //生成MinIO预签名上传URL和拼接下载URL
+	get /uploadUrl (GetUploadUrlRequest) returns (UploadUrlResponse)
+
+	@handler updateAvatar //更新头像
+	post /update/avatar (UpdateAvatarRequest)
+
+	@handler getUserBalance //用户余额查询
+	get /balance/:userId (UserIdPathRequest)
+
+	@handler getBalanceDetail //用户余额明细查询
+	get /balanceDetail/:userId (GetBalanceDetailRequest)
+
+	@handler refreshToken //用RefreshToken换取新的AccessToken，实现无感续签。
+	post /auth/refresh (RefreshTokeRequest) returns (string)
+}
+
+@server (
+	prefix:  /api/contact //路由前缀
+	group:   contact //代码分组，生成的文件放在 contact/ 子目录，不配则全堆一起
+	timeout: 10s // 该组路由的统一超时，覆盖全局配置
+)
+service user-api {
+	//搜索用户（手机号或邮箱）
+	@handler searchUser
+	get /:userId/user/search (SearchUserReq) returns (FriendDetailVO)
+
+	//获取联系人列表
+	@handler getFriends
+	get /:userId/friend (GetFriendsReq)
+
+	//发送好友申请
+	@handler sendFriendRequest
+	post /:userId/friend/:receiveuserId (SendFriendRequestReq) returns (bool)
+
+	//获取好友申请列表
+	@handler getApplyList
+	get /:userId/apply (GetApplyListReq)
+
+	//获取未读好友申请数量
+	@handler getUnreadApplyCount
+	get /:userId/applyCount (UserIdPathRequest)
+
+	//删除好友
+	@handler deleteFriend
+	delete /:userId/friend/:receiveuserId (UserIdAndReceiveuserIdReq) returns (bool)
+
+	//拉黑好友
+	@handler blockFriend
+	post /:userId/block/:receiveuserId (UserIdAndReceiveuserIdReq) returns (bool)
+
+	//取消拉黑好友
+	@handler unblockFriend
+	delete /:userId/block/:receiveuserId (UserIdAndReceiveuserIdReq) returns (bool)
+
+	//修改好友申请状态
+	@handler modifyFriendApplicationStatus
+	post /:userId/application/:status (ModifyFriendApplicationStatusReq)
+
+	//获取好友详情
+	@handler getFriendDetail
+	get /:userId/friend/:friendId (GetFriendDetailReq) returns (FriendDetailVO)
+}
+
+@server (
+	prefix:  /api/group //路由前缀
+	group:   group //代码分组，生成的文件放在 group/ 子目录，不配则全堆一起
+	timeout: 10s // 该组路由的统一超时，覆盖全局配置
+)
+service user-api {
+	//创建群聊
+	@handler createGroup
+	post / (CreateGroupRequest)
+
+	//群聊邀请接口
+	@handler inviteGroup
+	post /invite (InviteGroupRequest) returns (InviteGroupResponse)
+
+	//群聊踢人接口
+	@handler kickGroupMembers
+	post /kick (KickGroupMembersRequest) returns (KickGroupMembersResponse)
+
+	//退出群聊接口
+	@handler exitGroup
+	post /exit (GroupExitRequestDTO) returns (bool)
+
+	//获取群聊成员
+	@handler getGroupMembers
+	get /:sessionId/members (GetGroupMembersReq)
+
+	//获取用户加入的所有群聊
+	@handler getUserGroups
+	get /user/:userId (GetUserGroupsReq)
+
+	//获取群聊人数
+	@handler getGroupMemberCount
+	get /:sessionId/count (SessionIdPathReq)
+}
+

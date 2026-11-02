@@ -1,0 +1,35 @@
+Name: user-api
+Host: 0.0.0.0
+Port: 8104
+
+Redis:
+    Host: 0.0.0.0
+    Pass:""
+    Type: node
+  
+Cache: # go-zero的缓存也允许配置为Redis
+    -   Host: localhost:6379
+        Pass:""
+        Type: node
+
+Minio:
+    Url: http://localhost:9000
+    AccessKey: root
+    SecretKey: 123456
+
+DataSource: root:password@tcp(localhost:3306)/infiniteChat?charset=utf8mb4&parseTime=True&loc=Local
+
+Etcd:
+    Endpoints:
+      - localhost:2379
+    Prefix: /services/realtimeservice
+
+Kafka:
+    Brokers:
+        - "localhost:9092"
+
+Log:
+    Mode: console
+    Stat: false
+    Level: error
+    
