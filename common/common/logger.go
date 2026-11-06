@@ -6,9 +6,11 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+// Logger 全局日志对象
 var Logger *zap.SugaredLogger
 
 func init() {
+	// 自动初始化执行
 	encoderConfig := zapcore.EncoderConfig{
 		TimeKey:       "time",
 		LevelKey:      "level",
@@ -26,15 +28,19 @@ func init() {
 	}
 
 	core := zapcore.NewCore(
-		zapcore.NewConsoleEncoder(encoderConfig),
-		zapcore.AddSync(colorable.NewColorableStdout()),
-		zapcore.DebugLevel,
+		zapcore.NewConsoleEncoder(encoderConfig),        // 日志从终端输出格式，适合人阅读
+		zapcore.AddSync(colorable.NewColorableStdout()), // 输出到标准输出，并支持彩色终端显示；`AddSync` 将输出对象适配成 Zap 所需的接口。
+		zapcore.DebugLevel,                              // 最低输出级别为 Debug, Debug < Info < Warn < Error < Fatal
 	)
 
+	// 创建日志记录器
+	// zap.AddCaller()：显示打印日志的文件名和行号。
+	// zap.AddCallerSkip(1)：额外跳过一层调用，避免显示当前函数的调用信息
 	logger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
 	Logger = logger.Sugar()
 }
 
+// 对外封装日志函数
 func Info(args ...any) {
 	Logger.Info(args...)
 }

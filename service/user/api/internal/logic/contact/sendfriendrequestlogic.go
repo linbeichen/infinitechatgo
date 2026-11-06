@@ -27,7 +27,6 @@ func NewSendFriendRequestLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 }
 
 func (l *SendFriendRequestLogic) SendFriendRequest(req *types.SendFriendRequestReq) (resp bool, err error) {
-	// todo: add your logic here and delete this line
 
 	return
 }

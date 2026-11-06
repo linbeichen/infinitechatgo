@@ -11,6 +11,7 @@ import (
 	"net/http"
 
 	"infinitechatgo/common/common"
+	"infinitechatgo/common/middleware"
 	"infinitechatgo/common/utils"
 	"infinitechatgo/service/user/api/internal/config"
 	"infinitechatgo/service/user/api/internal/handler"
@@ -29,7 +30,7 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 
-	// 统一错误响应
+	// =========================================统一错误响应===================================================
 	httpx.SetErrorHandlerCtx(func(ctx context.Context, err error) (int, any) {
 		if errors.As(err, &common.SystemError) || errors.As(err, &common.SystemBusy) || errors.As(err, common.OperationError) {
 			var e common.ErrorCode
@@ -53,7 +54,17 @@ func main() {
 		common.Errorf("系统异常，原因：%s", err.Error())
 		return http.StatusInternalServerError, utils.FailWithCode(500, common.SystemError.Message)
 	})
+
+	// =========================================统一成功响应===================================================
+	httpx.SetOkHandler(func(ctx context.Context, data any) any {
+		return utils.Success(data)
+	})
+
 	server := rest.MustNewServer(c.RestConf)
+
+	// =============================================注册中间件===================================================
+	// 注册全局异常处理
+	server.Use(middleware.RecoverMiddleware)
 	defer server.Stop()
 
 	ctx := svc.NewServiceContext(c)
