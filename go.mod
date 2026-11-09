@@ -3,9 +3,12 @@ module infinitechatgo
 go 1.26.5
 
 require (
+	github.com/bwmarrin/snowflake v0.3.0
 	github.com/go-playground/validator/v10 v10.30.6
+	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/mattn/go-colorable v0.1.13
 	github.com/zeromicro/go-zero v1.10.3
+	go.etcd.io/etcd/client/v3 v3.5.21
 	go.uber.org/zap v1.24.0
 	google.golang.org/grpc v1.80.0
 	google.golang.org/protobuf v1.36.11
@@ -32,7 +35,6 @@ require (
 	github.com/go-playground/universal-translator v0.18.2 // indirect
 	github.com/go-sql-driver/mysql v1.10.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/gnostic-models v0.7.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
@@ -63,7 +65,6 @@ require (
 	github.com/x448/float16 v0.8.4 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.21 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.21 // indirect
-	go.etcd.io/etcd/client/v3 v3.5.21 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/otel v1.40.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.40.0 // indirect
