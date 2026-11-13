@@ -51,6 +51,10 @@ func (s *UserService) GetUser(account string) (*user.User, error) {
 	return nil, nil
 }
 
+func (s *UserService) GetUserById(userId int64) (*user.User, error) {
+	return s.userModel.FindOne(context.Background(), userId)
+}
+
 func (s *UserService) EncryptPassword(password string) string {
 	h := md5.New()
 	h.Write([]byte(constants.PasswordSalt + password))

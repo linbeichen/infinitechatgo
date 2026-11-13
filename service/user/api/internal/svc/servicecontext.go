@@ -7,6 +7,7 @@ import (
 	"infinitechatgo/common/common"
 	"infinitechatgo/service/user/api/internal/config"
 	"infinitechatgo/service/user/api/internal/service"
+	"infinitechatgo/service/user/api/internal/types/constants"
 
 	// model
 	"infinitechatgo/service/user/model/apply_friend"
@@ -22,8 +23,9 @@ import (
 )
 
 type ServiceContext struct {
-	Config config.Config
-	Redis  *redis.Redis
+	Config  config.Config
+	Redis   *redis.Redis
+	SqlConn sqlx.SqlConn
 
 	// WsServerLocator 用于定位到正确的 WebSocket 服务器
 	WsServerLocator *service.WsServerLocator
@@ -37,8 +39,16 @@ type ServiceContext struct {
 	UserSessionModel user_session.UserSessionModel
 	FriendModel      friend.FriendModel
 
+	// kafka
+	KafkaPusherManager  *service.PusherManager
+	NotificationService *service.NotificationService
+
 	// service
-	UserService *service.UserService
+	UserService        *service.UserService
+	BalanceService     *service.BalanceService
+	FriendService      *service.FriendService
+	SessionService     *service.SessionService
+	UserSessionService *service.UserSessionService
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -61,13 +71,30 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		locator = nil
 	}
 
+	// Kafka 相关
+	var pusherManager *service.PusherManager
+	if len(c.Kafka.Brokers) > 0 {
+		pusherManager = service.NewPusherManager(c.Kafka.Brokers, constants.AllKafkaTopics())
+	} else {
+		common.Errorf("Kafka Brokers 未配置，Kafka 功能将不可用")
+	}
+	notificationService := service.NewNotificationService(pusherManager)
+
 	// service
 	userService := service.NewUserService(userModel, rds)
+	balanceService := service.NewBalanceService(userBalanceModel, rds)
+	sessionService := service.NewSessionService(sessionModel, rds)
+	userSessionService := service.NewUserSessionService(userSessionModel, rds, conn)
+	friendService := service.NewFriendService(userService, sessionService, userSessionService, friendModel, applyFriendModel, rds, conn, notificationService)
 
 	return &ServiceContext{
-		Config:           c,
-		Redis:            rds,
-		WsServerLocator:  locator,
+		Config: c,
+		Redis:  rds,
+
+		SqlConn:         conn,
+		WsServerLocator: locator,
+
+		// 模型
 		UserModel:        userModel,
 		UserBalanceModel: userBalanceModel,
 		ApplyFriendModel: applyFriendModel,
@@ -75,6 +102,16 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		SessionModel:     sessionModel,
 		UserSessionModel: userSessionModel,
 		FriendModel:      friendModel,
-		UserService:      userService,
+
+		// service
+		UserService:        userService,
+		BalanceService:     balanceService,
+		FriendService:      friendService,
+		SessionService:     sessionService,
+		UserSessionService: userSessionService,
+
+		// Kafka 相关
+		KafkaPusherManager:  pusherManager,
+		NotificationService: notificationService,
 	}
 }

@@ -1,6 +1,11 @@
 package user
 
 import (
+	"context"
+	"database/sql"
+	"fmt"
+	"infinitechatgo/common/txctx"
+
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
@@ -12,6 +17,9 @@ type (
 	// and implement the added methods in customUserModel.
 	UserModel interface {
 		userModel
+		InsertTx(ctx context.Context, data *User) (sql.Result, error)
+		UpdateTx(ctx context.Context, data *User) error
+		DeleteTx(ctx context.Context, userId int64) error
 	}
 
 	customUserModel struct {
@@ -24,4 +32,32 @@ func NewUserModel(conn sqlx.SqlConn, c cache.CacheConf, opts ...cache.Option) Us
 	return &customUserModel{
 		defaultUserModel: newUserModel(conn, c, opts...),
 	}
+}
+
+func (m *customUserModel) InsertTx(ctx context.Context, data *User) (sql.Result, error) {
+	if session := txctx.GetSession(ctx); session != nil {
+		query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", m.table, userRowsExpectAutoSet)
+		return session.ExecCtx(ctx, query, data.UserId, data.Phone, data.Email, data.Password, data.Nickname, data.Avatar, data.Gender, data.Description, data.State, data.Role, data.CreatedTime, data.UpdatedTime, data.IsDelete)
+	}
+	return m.Insert(ctx, data)
+}
+
+// UpdateTx 如果 ctx 中有事务 session 则走事务连接，否则走原来的 CachedConn
+func (m *customUserModel) UpdateTx(ctx context.Context, data *User) error {
+	if session := txctx.GetSession(ctx); session != nil {
+		query := fmt.Sprintf("update %s set %s where `user_id` = ?", m.table, userRowsWithPlaceHolder)
+		_, err := session.ExecCtx(ctx, query, data.Phone, data.Email, data.Password, data.Nickname, data.Avatar, data.Gender, data.Description, data.State, data.Role, data.CreatedTime, data.UpdatedTime, data.IsDelete, data.UserId)
+		return err
+	}
+	return m.Update(ctx, data)
+}
+
+// DeleteTx 如果 ctx 中有事务 session 则走事务连接，否则走原来的 CachedConn
+func (m *customUserModel) DeleteTx(ctx context.Context, userId int64) error {
+	if session := txctx.GetSession(ctx); session != nil {
+		query := fmt.Sprintf("delete from %s where `user_id` = ?", m.table)
+		_, err := session.ExecCtx(ctx, query, userId)
+		return err
+	}
+	return m.Delete(ctx, userId)
 }
